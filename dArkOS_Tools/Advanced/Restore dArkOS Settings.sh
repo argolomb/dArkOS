@@ -45,6 +45,10 @@ do
 		# /etc/NetworkManager/system-connections/ from racing tar's writes and
 		# leaving the .nmconnection files at 0 bytes.
 		sudo systemctl stop NetworkManager
+		# Stop filebrowser so its open SQLite handle on filebrowser.db
+		# doesn't get a truncated file from tar mid-write.
+		sudo pkill -f filebrowser || true
+
 		sudo tar --same-owner -zxhvf "$BACKUP_FILE" -C / | tee -a "$LOG_FILE"
 		TAR_STATUS=$?
 		sudo systemctl start NetworkManager
