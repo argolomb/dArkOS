@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Build and install custom kernel from christianhaitian/linux
+# Build and install custom RK3566 kernel.
 KERNEL_SRC=main
 if [ ! -d "$KERNEL_SRC" ]; then
-  git clone --recursive --depth=1 https://github.com/christianhaitian/kernel_5_10_226.git $KERNEL_SRC
+  git clone --recursive --depth=1 https://github.com/argolomb/kernel_5_10_226.git $KERNEL_SRC
 fi
 cd $KERNEL_SRC
 # Change the boot logo depending on the device
