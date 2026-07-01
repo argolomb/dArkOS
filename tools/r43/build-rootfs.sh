@@ -31,6 +31,7 @@ suite="${DEBIAN_CODE_NAME:-trixie}"
 mirror="${DEBIAN_MIRROR:-http://deb.debian.org/debian/}"
 kernel_src="$project_root/main"
 cross_compile="${CROSS_COMPILE:-aarch64-linux-gnu-}"
+kernel_defconfig="${KERNEL_DEFCONFIG:-rk3566_r43_defconfig}"
 
 cd "$project_root"
 
@@ -146,7 +147,7 @@ sudo chroot "$rootdir" systemctl enable NetworkManager
 sudo chroot "$rootdir" systemctl disable ssh || true
 
 echo "Installing kernel modules and firmware from $kernel_src..."
-make -C "$kernel_src" ARCH=arm64 CROSS_COMPILE="$cross_compile" olddefconfig
+make -C "$kernel_src" ARCH=arm64 CROSS_COMPILE="$cross_compile" "$kernel_defconfig"
 make -C "$kernel_src" ARCH=arm64 CROSS_COMPILE="$cross_compile" modules
 sudo make -C "$kernel_src" ARCH=arm64 CROSS_COMPILE="$cross_compile" INSTALL_MOD_PATH="$rootdir" modules_install
 sudo rsync -aL --ignore-errors "$kernel_src/lib/firmware/" "$rootdir/lib/firmware/" 2>/dev/null || true
