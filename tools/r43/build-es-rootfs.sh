@@ -159,6 +159,15 @@ rm -rf EmulationStation-fcamod
 '
 
 echo "Installing R43 EmulationStation configs and wrappers..."
+es_input_cfg="$project_root/Emulationstation/es_input.cfg.r43"
+es_settings_cfg="$project_root/Emulationstation/es_settings.cfg.r43"
+if [[ ! -f "$es_input_cfg" ]]; then
+  es_input_cfg="$project_root/Emulationstation/es_input.cfg.rk2023"
+fi
+if [[ ! -f "$es_settings_cfg" ]]; then
+  es_settings_cfg="$project_root/Emulationstation/es_settings.cfg.rk2023"
+fi
+
 sudo mkdir -p \
   "$rootdir/etc/emulationstation" \
   "$rootdir/home/ark/.emulationstation" \
@@ -167,8 +176,8 @@ sudo mkdir -p \
   "$rootdir/etc/systemd/system"
 
 sudo cp "$project_root/Emulationstation/es_systems.cfg.rk3566-64bit_Only" "$rootdir/etc/emulationstation/es_systems.cfg"
-sudo cp "$project_root/Emulationstation/es_input.cfg.rk2023" "$rootdir/etc/emulationstation/es_input.cfg"
-sudo cp "$project_root/Emulationstation/es_settings.cfg.rk2023" "$rootdir/home/ark/.emulationstation/es_settings.cfg"
+sudo cp "$es_input_cfg" "$rootdir/etc/emulationstation/es_input.cfg"
+sudo cp "$es_settings_cfg" "$rootdir/home/ark/.emulationstation/es_settings.cfg"
 sudo cp -R "$project_root/Emulationstation/scripts" "$rootdir/home/ark/.emulationstation/"
 if [[ -d "$project_root/Emulationstation/fonts" ]]; then
   sudo cp "$project_root"/Emulationstation/fonts/* "$rootdir/usr/bin/emulationstation/resources/" 2>/dev/null || true
