@@ -35,7 +35,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             bc bison flex build-essential gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
-            libssl-dev libncurses-dev device-tree-compiler u-boot-tools \
+            libssl-dev libelf-dev libncurses-dev dwarves device-tree-compiler u-boot-tools \
             debootstrap qemu-user-static binfmt-support eatmydata \
             btrfs-progs dosfstools exfatprogs gdisk parted p7zip-full lz4 lzop rsync \
             python3 python-is-python3 wget curl ca-certificates
