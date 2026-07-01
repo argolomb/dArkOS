@@ -1,0 +1,58 @@
+/dts-v1/;
+
+/ {
+	description = "dArkOS R43 FIT image";
+
+	images {
+		kernel {
+			description = "dArkOS R43 Linux kernel";
+			data = /incbin/("Image");
+			type = "kernel";
+			arch = "arm64";
+			os = "linux";
+			compression = "none";
+			load = <0xffffff01>;
+			entry = <0xffffff01>;
+
+			hash {
+				algo = "sha256";
+			};
+		};
+
+		fdt {
+			description = "R43 device tree";
+			data = /incbin/("rk3566-r43m18.dtb");
+			type = "flat_dt";
+			arch = "arm64";
+			compression = "none";
+			load = <0xffffff00>;
+
+			hash {
+				algo = "sha256";
+			};
+		};
+
+		resource {
+			description = "Rockchip resource image";
+			data = /incbin/("resource.img");
+			type = "multi";
+			arch = "arm64";
+			compression = "none";
+
+			hash {
+				algo = "sha256";
+			};
+		};
+	};
+
+	configurations {
+		default = "conf";
+
+		conf {
+			description = "dArkOS R43";
+			kernel = "kernel";
+			fdt = "fdt";
+			multi = "resource";
+		};
+	};
+};

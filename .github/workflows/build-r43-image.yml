@@ -1,0 +1,68 @@
+name: Build R43 SD image
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_size:
+        description: "Output image size"
+        required: false
+        default: "8G"
+      upload_raw_img:
+        description: "Also upload the raw .img artifact"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout R43 kernel
+        run: |
+          rm -rf main
+          git clone --depth=1 https://github.com/argolomb/kernel_5_10_226.git main
+
+      - name: Install host dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            bc bison flex build-essential gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
+            libssl-dev libncurses-dev device-tree-compiler u-boot-tools \
+            debootstrap qemu-user-static binfmt-support eatmydata \
+            btrfs-progs dosfstools exfatprogs gdisk parted p7zip-full lz4 lzop rsync \
+            python3 python-is-python3 wget curl ca-certificates
+
+      - name: Enable qemu binfmt
+        run: |
+          sudo update-binfmts --enable qemu-aarch64 || true
+
+      - name: Build image
+        env:
+          IMAGE_SIZE: ${{ inputs.image_size }}
+          OUTDIR: .tmp/generated/images
+          ROOTDIR: .tmp/generated/darkos-r43-rootfs
+        run: |
+          tools/r43/build-image.sh
+
+      - name: Upload compressed image
+        uses: actions/upload-artifact@v4
+        with:
+          name: darkos-r43-image-7z
+          path: .tmp/generated/images/*.7z*
+          if-no-files-found: error
+
+      - name: Upload raw image
+        if: ${{ inputs.upload_raw_img == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: darkos-r43-image-raw
+          path: .tmp/generated/images/*.img
+          if-no-files-found: error
