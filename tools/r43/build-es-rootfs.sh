@@ -87,10 +87,11 @@ set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y \
-  build-essential git cmake pkg-config premake4 ca-certificates wget curl dialog evtest \
+  build-essential git cmake meson ninja-build pkg-config premake4 ca-certificates wget curl dialog evtest \
   iproute2 iw rfkill console-setup fonts-droid-fallback \
   libfreeimage-dev libsdl2-dev libsdl2-mixer-dev libfreetype-dev \
   libcurl4-openssl-dev libvlc-dev libasound2-dev libdrm-dev libgbm-dev \
+  libegl-dev libgles-dev libopenal-dev libevdev-dev \
   libxkbcommon-dev libudev-dev libpng-dev rapidjson-dev
 '
 
@@ -135,6 +136,25 @@ if [[ -f "$project_root/misc/rk3566/vulkan/rk_vk.json" ]]; then
 fi
 
 sudo chroot "$rootdir" ldconfig
+
+echo "Building librga inside rootfs..."
+sudo chroot "$rootdir" bash -c '
+set -e
+arch="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
+cd /home/ark
+rm -rf linux-rga
+git clone https://github.com/christianhaitian/linux-rga.git
+cd linux-rga
+git checkout 1fc02d56d97041c86f01bc1284b7971c6098c5fb
+meson setup build
+meson compile -C build
+cp -a build/librga.so* "/usr/lib/$arch/"
+mkdir -p /usr/local/include/rga
+cp -f drmrga.h rga.h RgaApi.h RockchipRgaMacro.h /usr/local/include/rga/
+cd /home/ark
+rm -rf linux-rga
+ldconfig
+'
 
 echo "Building libgo2 inside rootfs..."
 sudo chroot "$rootdir" bash -c '
