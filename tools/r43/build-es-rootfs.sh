@@ -91,7 +91,7 @@ apt-get install -y \
   iproute2 iw rfkill console-setup fonts-droid-fallback \
   libfreeimage-dev libsdl2-dev libsdl2-mixer-dev libfreetype-dev \
   libcurl4-openssl-dev libvlc-dev libasound2-dev libdrm-dev libgbm-dev \
-  libxkbcommon-dev libudev-dev libpng-dev
+  libxkbcommon-dev libudev-dev libpng-dev rapidjson-dev
 '
 
 echo "Installing Mali G52 userspace..."
