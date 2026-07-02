@@ -87,7 +87,7 @@ set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y \
-  build-essential git cmake pkg-config ca-certificates wget curl dialog evtest \
+  build-essential git cmake pkg-config premake4 ca-certificates wget curl dialog evtest \
   iproute2 iw rfkill console-setup fonts-droid-fallback \
   libfreeimage-dev libsdl2-dev libsdl2-mixer-dev libfreetype-dev \
   libcurl4-openssl-dev libvlc-dev libasound2-dev libdrm-dev libgbm-dev \
@@ -135,6 +135,25 @@ if [[ -f "$project_root/misc/rk3566/vulkan/rk_vk.json" ]]; then
 fi
 
 sudo chroot "$rootdir" ldconfig
+
+echo "Building libgo2 inside rootfs..."
+sudo chroot "$rootdir" bash -c '
+set -e
+arch="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
+cd /home/ark
+rm -rf libgo2
+ln -sfn /usr/include/libdrm /usr/include/drm
+git clone --recursive --depth=1 https://github.com/OtherCrashOverride/libgo2.git
+cd libgo2
+premake4 gmake
+make -j"$(nproc)"
+cp -a libgo2.so* "/usr/lib/$arch/"
+mkdir -p /usr/include/go2
+cp -L src/*.h /usr/include/go2/
+cd /home/ark
+rm -rf libgo2
+ldconfig
+'
 
 echo "Building EmulationStation-fcamod inside rootfs..."
 sudo chroot "$rootdir" bash -c '
