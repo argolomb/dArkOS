@@ -10,6 +10,9 @@ Packages an R43 SD image using the already-built kernel/DTB and ROOTDIR.
 
 Default SIZE:
   8G
+
+Environment:
+  ROOTFS_SIZE  Optional rootfs partition size, for example 12G.
 USAGE
 }
 
@@ -21,6 +24,7 @@ fi
 rootdir="$(realpath -m "$1")"
 out_img="$(realpath -m "$2")"
 image_size="${3:-8G}"
+rootfs_size="${ROOTFS_SIZE:-}"
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 project_root="$(cd "$script_dir/../.." && pwd)"
 
@@ -77,13 +81,23 @@ truncate -s "$image_size" "$out_img"
 loopdev="$(sudo losetup --show --partscan --find "$out_img")"
 
 sudo sgdisk --zap-all "$loopdev"
-sudo sgdisk \
-  --new=1:32768:294911 --change-name=1:nand_boot --typecode=1:EBD0A0A2-B9E5-4433-87C0-68B6B72699C7 \
-  --new=2:24576:32767 --change-name=2:resource --typecode=2:D46E0000-0000-457F-8000-220D000030DB \
-  --new=3:294912:557055 --change-name=3:dArkOS_Fat --typecode=3:EBD0A0A2-B9E5-4433-87C0-68B6B72699C7 \
-  --new=4:557056:15445614 --change-name=4:rootfs --typecode=4:EBD0A0A2-B9E5-4433-87C0-68B6B72699C7 \
-  --new=5:15446016:0 --change-name=5:ROMS --typecode=5:EBD0A0A2-B9E5-4433-87C0-68B6B72699C7 \
-  "$loopdev"
+if [[ -n "$rootfs_size" ]]; then
+  sudo sgdisk \
+    --new=1:32768:294911 --change-name=1:nand_boot --typecode=1:EBD0A0A2-B9E5-4433-87C0-68B6B72699C7 \
+    --new=2:24576:32767 --change-name=2:resource --typecode=2:D46E0000-0000-457F-8000-220D000030DB \
+    --new=3:294912:557055 --change-name=3:dArkOS_Fat --typecode=3:EBD0A0A2-B9E5-4433-87C0-68B6B72699C7 \
+    --new=4:557056:+"$rootfs_size" --change-name=4:rootfs --typecode=4:EBD0A0A2-B9E5-4433-87C0-68B6B72699C7 \
+    --new=5:0:0 --change-name=5:ROMS --typecode=5:EBD0A0A2-B9E5-4433-87C0-68B6B72699C7 \
+    "$loopdev"
+else
+  sudo sgdisk \
+    --new=1:32768:294911 --change-name=1:nand_boot --typecode=1:EBD0A0A2-B9E5-4433-87C0-68B6B72699C7 \
+    --new=2:24576:32767 --change-name=2:resource --typecode=2:D46E0000-0000-457F-8000-220D000030DB \
+    --new=3:294912:557055 --change-name=3:dArkOS_Fat --typecode=3:EBD0A0A2-B9E5-4433-87C0-68B6B72699C7 \
+    --new=4:557056:15445614 --change-name=4:rootfs --typecode=4:EBD0A0A2-B9E5-4433-87C0-68B6B72699C7 \
+    --new=5:15446016:0 --change-name=5:ROMS --typecode=5:EBD0A0A2-B9E5-4433-87C0-68B6B72699C7 \
+    "$loopdev"
+fi
 sudo partprobe "$loopdev"
 sleep 2
 
